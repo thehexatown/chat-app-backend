@@ -1,0 +1,89 @@
+require("dotenv").config();
+const cors = require("cors");
+const connectDB = require("./config/db");
+const roomModel = require("./models/Room");
+const express = require("express");
+const app = express();
+const http = require("http").Server(app);
+const io = require("socket.io")(http, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
+const conversationRoute = require("./routes/conversations");
+const messageRoute = require("./routes/messages");
+const auth = require("./routes/auth");
+const room = require("./routes/room");
+const Room = require("./models/Room");
+const { Console } = require("console");
+
+app.use(cors());
+app.use(express.json());
+
+connectDB();
+
+app.get("/", (req, res) => {
+  res.send("Hello World");
+});
+
+app.use("/api/auth", auth);
+app.use("/api/conversations", conversationRoute);
+app.use("/api/messages", messageRoute);
+app.use("/api/room", room);
+
+const PORT = process.env.PORT || 5000;
+
+const server = http.listen(PORT, () =>
+  console.log(`server is runing on PORT ${PORT}...`)
+);
+
+///////////
+let users = [];
+
+const addUser = (userId, socketId) => {
+  !users.some((user) => user.userId === userId) &&
+    users.push({ userId, socketId });
+};
+
+const removeUser = (socketId) => {
+  users = users.filter((user) => user.socketId !== socketId);
+};
+
+const getUser = (userId) => {
+  return users.find((user) => user.userId === userId);
+};
+
+io.on("connection", (socket) => {
+  console.log("a user connected");
+  //when ceonnect
+
+  //take userId and socketId from user
+  socket.on("addUser", (userId) => {
+    addUser(userId, socket.id);
+    io.emit("getUsers", users);
+    console.log(users);
+  });
+
+  //send and get message
+  socket.on("sendMessage", ({ senderId, receiverId, text }) => {
+    const user = getUser(receiverId);
+    io.to(user?.socketId).emit("getMessage", {
+      senderId,
+      text,
+    });
+  });
+  socket.on("newConversation", (data) => {
+    console.log("newConvo", data);
+  });
+
+  //when disconnect
+  socket.on("disconnect", () => {
+    console.log("a user disconnected!");
+    removeUser(socket.id);
+    io.emit("getUsers", users);
+  });
+});
+
+module.exports = server;
