@@ -1,4 +1,4 @@
-const Employee = require("../models/employee");
+const Employee = require("../models/user");
 const hashPassword = require("../utils/hashpassword");
 const { generateToken } = require("../utils/genrateToken");
 const matchPaswsord = require("../utils/matchpassword");

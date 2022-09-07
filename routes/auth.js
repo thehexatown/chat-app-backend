@@ -1,6 +1,6 @@
 const express = require("express");
 const Auth = express.Router();
-const Employee = require("../models/employee");
+const Employee = require("../models/user");
 const authContrller = require("../controllers/auth");
 
 //register Employee
