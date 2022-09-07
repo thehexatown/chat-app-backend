@@ -1,7 +1,6 @@
 require("dotenv").config();
 const cors = require("cors");
 const connectDB = require("./config/db");
-const roomModel = require("./models/Room");
 const express = require("express");
 const app = express();
 const http = require("http").Server(app);
@@ -15,9 +14,7 @@ const io = require("socket.io")(http, {
 const conversationRoute = require("./routes/conversations");
 const messageRoute = require("./routes/messages");
 const auth = require("./routes/auth");
-const room = require("./routes/room");
-const Room = require("./models/Room");
-const { Console } = require("console");
+const user = require("./routes/users");
 
 app.use(cors());
 app.use(express.json());
@@ -31,7 +28,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", auth);
 app.use("/api/conversations", conversationRoute);
 app.use("/api/messages", messageRoute);
-app.use("/api/room", room);
+app.use("/api/users", user);
 
 const PORT = process.env.PORT || 5000;
 
@@ -56,14 +53,12 @@ const getUser = (userId) => {
 };
 
 io.on("connection", (socket) => {
-  console.log("a user connected");
   //when ceonnect
 
   //take userId and socketId from user
   socket.on("addUser", (userId) => {
     addUser(userId, socket.id);
     io.emit("getUsers", users);
-    console.log(users);
   });
 
   //send and get message
@@ -77,7 +72,9 @@ io.on("connection", (socket) => {
   socket.on("newConversation", (data) => {
     console.log("newConvo", data);
   });
-
+  socket.on("allConversations", (data) => {
+    console.log("here", data);
+  });
   //when disconnect
   socket.on("disconnect", () => {
     console.log("a user disconnected!");

@@ -1,4 +1,5 @@
 const Employee = require("../models/user");
+const User = require("../models/user");
 const hashPassword = require("../utils/hashpassword");
 const { generateToken } = require("../utils/genrateToken");
 const matchPaswsord = require("../utils/matchpassword");
@@ -66,6 +67,17 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.searchUsers = async (req, res) => {
+  try {
+    const users = await User.find({
+      name: { $regex: req.query.search, $options: "i" },
+    });
+    res.status(200).json(users);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+};
 exports.getUsers = async (req, res) => {
   const { onlineUsers } = req.body;
   console.log(onlineUsers);

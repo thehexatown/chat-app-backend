@@ -4,12 +4,12 @@ const { create } = require("../services/conversation");
 
 //new conv
 
-router.post("/", async (req, res) => {
-  console.log(req.body);
+router.post("/create", async (req, res) => {
+  console.log("iam ruunniong");
   const newConversation = new Conversation({
-    members: [req.body.senderId, req.body.receiverId],
+    User1: req.body.senderId,
+    User2: req.body.receiverId,
   });
-  // create(req.body.senderId, req.body.receiverId);
 
   try {
     const savedConversation = await newConversation.save();
@@ -20,12 +20,14 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/:userId", async (req, res) => {
+  // members: { $in: [req.params.userId] },
   try {
     const conversation = await Conversation.find({
-      members: { $in: [req.params.userId] },
-    });
+      $or: [{ sender: req.params.userId }, { receiver: req.params.userId }],
+    }).populate("User2");
     res.status(200).json(conversation);
   } catch (err) {
+    console.log(err);
     res.status(500).json(err);
   }
 });
