@@ -7,8 +7,7 @@ const { create } = require("../services/conversation");
 router.post("/create", async (req, res) => {
   console.log("iam ruunniong");
   const newConversation = new Conversation({
-    User1: req.body.senderId,
-    User2: req.body.receiverId,
+    members: [req.body.senderId, req.body.receiverId],
   });
 
   try {
@@ -23,8 +22,8 @@ router.get("/:userId", async (req, res) => {
   // members: { $in: [req.params.userId] },
   try {
     const conversation = await Conversation.find({
-      $or: [{ sender: req.params.userId }, { receiver: req.params.userId }],
-    }).populate("User2");
+      members: { $in: [req.params.userId] },
+    });
     res.status(200).json(conversation);
   } catch (err) {
     console.log(err);

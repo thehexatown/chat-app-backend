@@ -69,12 +69,15 @@ io.on("connection", (socket) => {
       text,
     });
   });
-  socket.on("newConversation", (data) => {
-    console.log("newConvo", data);
+  socket.on("Typing", (receiverId) => {
+    const user = getUser(receiverId);
+    io.to(user?.socketId).emit("getTyping", true);
   });
-  socket.on("allConversations", (data) => {
-    console.log("here", data);
+  socket.on("removeTyping", (receiverId) => {
+    const user = getUser(receiverId);
+    io.to(user?.socketId).emit("getRemoveTyping", false);
   });
+
   //when disconnect
   socket.on("disconnect", () => {
     console.log("a user disconnected!");

@@ -80,7 +80,7 @@ exports.searchUsers = async (req, res) => {
 };
 exports.getUsers = async (req, res) => {
   const { onlineUsers } = req.body;
-  console.log(onlineUsers);
+
   try {
     let users = [];
     for (let i = 0; i < onlineUsers.length; i++) {
